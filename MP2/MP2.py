@@ -93,73 +93,102 @@ class Solution():
 
         return self.img - new_img
 
-# experiment
+### experiment ###
+# gun
 gun = Solution('images/gun.bmp')
-gun_dilation = gun.Dilation([1, 1])
-cv.imshow('gun_dilation [1x1]', gun_dilation)
-cv.waitKey(0)
+# gun_dilation = gun.Dilation([1, 1])
+# cv.imshow('gun_dilation [1x1]', gun_dilation)
+# cv.waitKey(0)
 
 gun_dilation2 = gun.Dilation([3, 3])
 cv.imshow('gun_dilation [3x3]', gun_dilation2)
+cv.imwrite('results/gun_dilation [3x3].bmp', gun_dilation2)
 cv.waitKey(0)
 
-gun_dilation3 = gun.Dilation([5, 5])
-cv.imshow('gun_dilation [5x5]', gun_dilation3)
-cv.waitKey(0)
+# gun_dilation3 = gun.Dilation([5, 5])
+# cv.imshow('gun_dilation [5x5]', gun_dilation3)
+# cv.waitKey(0)
 
-gun_erosion = gun.Erosion([1,1])
-cv.imshow('gun_erosion [1x1]', gun_erosion)
-cv.waitKey(0)
+# gun_erosion = gun.Erosion([1,1])
+# cv.imshow('gun_erosion [1x1]', gun_erosion)
+# cv.waitKey(0)
 
 gun_erosion2 = gun.Erosion([3,3])
 cv.imshow('gun_erosion [3x3]', gun_erosion2)
-cv.waitKey(0)
-
-gun_boundary = gun.Boundary([3,3])
-cv.imshow('gun_boundary [3x3]', gun_boundary)
+cv.imwrite('results/gun_erosion [3x3].bmp', gun_erosion2)
 cv.waitKey(0)
 
 gun = Solution('images/gun.bmp')
 gun_opening = gun.Opening([3,3])
 cv.imshow('gun_opening [3x3]', gun_opening)
+cv.imwrite('results/gun_opening [3x3].bmp', gun_opening)
 cv.waitKey(0)
 
 gun = Solution('images/gun.bmp')
 gun_closing = gun.Closing([3,3])
 cv.imshow('gun_closing [3x3]', gun_closing)
+cv.imwrite('results/gun_closing [3x3].bmp', gun_closing)
 cv.waitKey(0)
 
-palm = Solution('images/palm.bmp')
-palm_dilation = palm.Dilation([1, 1])
-cv.imshow('palm_dilation [1x1]', palm_dilation)
+gun = Solution('images/gun.bmp')
+gun_boundary = gun.Boundary([3,3])
+cv.imshow('gun_boundary [3x3]', gun_boundary)
+cv.imwrite('results/gun_boundary [3x3].bmp', gun_boundary)
 cv.waitKey(0)
+
+# palm
+palm = Solution('images/palm.bmp')
+# palm_dilation = palm.Dilation([1, 1])
+# cv.imshow('palm_dilation [1x1]', palm_dilation)
+# cv.waitKey(0)
 
 palm_dilation2 = palm.Dilation([3, 3])
 cv.imshow('palm_dilation [3x3]', palm_dilation2)
+cv.imwrite('results/palm_dilation [3x3].bmp', palm_dilation2)
 cv.waitKey(0)
 
-palm_dilation3 = palm.Dilation([5, 5])
-cv.imshow('palm_dilation [5x5]', palm_dilation3)
-cv.waitKey(0)
+# palm_dilation3 = palm.Dilation([5, 5])
+# cv.imshow('palm_dilation [5x5]', palm_dilation3)
+# cv.waitKey(0)
 
-palm_erosion = palm.Erosion([1,1])
-cv.imshow('palm_erosion [1x1]', palm_erosion)
-cv.waitKey(0)
+# palm_erosion = palm.Erosion([1,1])
+# cv.imshow('palm_erosion [1x1]', palm_erosion)
+# cv.waitKey(0)
 
 palm_erosion2 = palm.Erosion([3,3])
 cv.imshow('palm_erosion [3x3]', palm_erosion2)
-cv.waitKey(0)
-
-palm_boundary = palm.Boundary([3,3])
-cv.imshow('palm_boundary [3x3]', palm_boundary)
+cv.imwrite('results/palm_erosion [3x3].bmp', palm_erosion2)
 cv.waitKey(0)
 
 palm = Solution('images/palm.bmp')
 palm_opening = palm.Opening([3,3])
 cv.imshow('palm_opening [3x3]', palm_opening)
+cv.imwrite('results/palm_opening [3x3].bmp', palm_opening)
 cv.waitKey(0)
 
 palm = Solution('images/palm.bmp')
 palm_closing = palm.Closing([3,3])
 cv.imshow('palm_closing [3x3]', palm_closing)
+cv.imwrite('results/palm_closing [3x3].bmp', palm_closing)
+cv.waitKey(0)
+
+palm = Solution('images/palm.bmp')
+palm_boundary = palm.Boundary([3,3])
+cv.imshow('palm_boundary [3x3]', palm_boundary)
+cv.imwrite('results/palm_boundary [3x3].bmp', palm_boundary)
+cv.waitKey(0)
+
+## trying to get clean boundary
+gun = Solution('images/gun.bmp')
+gun.img = gun.Dilation([5,5])
+clean_boundary = gun.Boundary([5,5])
+cv.imshow('clean_boundary gun', clean_boundary)
+cv.imwrite('results/clean_boundary gun.bmp', clean_boundary)
+cv.waitKey(0)
+
+palm = Solution('images/palm.bmp')
+palm.img = palm.Dilation([5,5])
+clean_boundary = palm.Boundary([5,5])
+cv.imshow('clean_boundary palm', clean_boundary)
+cv.imwrite('results/clean_boundary palm.bmp', clean_boundary)
 cv.waitKey(0)
