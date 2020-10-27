@@ -5,12 +5,14 @@ from scipy import signal
 import sys
 
 class Solution():
-    def __init__(self, path):
+    def __init__(self, path, title):
         # image
         self.img = cv.imread(path, cv.IMREAD_GRAYSCALE)
 
         if self.img is None:
             raise NameError('image not found')
+
+        self.title = title
 
     # generate gaussian kernel
     def Generate_GKernel(self, N, Sigma):
@@ -43,27 +45,12 @@ class Solution():
         # Create gaussian kernel
         kernel = self.Generate_GKernel(N, Sigma)
 
-        # convolute with image
-        # smooth_img = self.img.copy()
-        # height, width = self.img.shape
-        # kernel_height, kernel_width = kernel.shape
-        #
-        # for i in range(height):
-        #     for j in range(width):
-        #         temp = np.zeros((kernel_height, kernel_width))
-        #         for n in range(kernel_height):
-        #             for m in range(kernel_width):
-        #                 y = (i - kernel_height//2) + n
-        #                 x = (j - kernel_width//2) + m
-        #                 if y in range(height) and x in range(width):
-        #                     temp[n][m] = kernel[n][m]*self.img[y][x]
-        #
-        #         smooth_img[i][j] = np.sum(temp)
-        # print(kernel)
         smooth_img = signal.convolve2d(self.img, kernel)
         smooth_img = smooth_img.astype(np.uint8)
+
         # print(smooth_img)
-        # cv.imshow('smooth', np.absolute(smooth_img))
+        # cv.imshow('smoothed ' + str(N) + ', sigma: ' + str(Sigma) + ' ' + self.title, np.absolute(smooth_img))
+        # cv.imwrite('smoothed ' + str(N) + ', sigma: ' + str(Sigma) + ' ' + self.title + '.jpg', np.absolute(smooth_img))
         # cv.waitKey(0)
 
         return smooth_img
@@ -85,9 +72,6 @@ class Solution():
                                 [0,0,0],
                                 [-1j,-2j,-1j]])
             kernel = x_kernel + y_kernel
-            # kernel = np.array([[-1 + 1j, 0 + 2j, 1 + 1j],
-            #                   [-2 + 0j, 0 + 0j, 2 + 0j],
-            #                   [-1 -1j, 0 + -2j, 1 - 1j]])
         elif mode == 'Prewitt':
             x_kernel = np.array([[-1,0,1],
                                 [-1,0,1],
@@ -114,18 +98,20 @@ class Solution():
         # showing image
         magnitude_img = magnitude/np.max(magnitude) * 255
         magnitude_img = magnitude_img.astype(np.uint8)
-        # direction = direction + np.abs(np.min(direction))
-        # direction = direction/np.max(direction)*255
-        # direction = direction.astype(np.uint8)
+        # direction_img = direction + np.abs(np.min(direction))
+        # direction_img = direction_img/np.max(direction)*255
+        # direction_img = direction_img.astype(np.uint8)
 
-        cv.imshow('magnitude ' + mode, magnitude_img)
-        cv.waitKey(0)
-        # cv.imshow('ang', direction)
+        # cv.imshow('magnitude ' + mode + ' ' + self.title, magnitude_img)
+        # cv.imwrite('magnitude ' + mode + ' ' + self.title + '.jpg', magnitude_img)
+        # cv.waitKey(0)
+        # cv.imshow('angle ' + mode + ' ' + self.title, direction_img)
         # cv.waitKey(0)
 
         return magnitude, direction
 
     def FindThreshold(self, magnitude, percentageOfNonEdge=0.95):
+        self.pne = str(percentageOfNonEdge)
         T_high = 0
         magnitude = magnitude.astype(np.uint8)
         height, width = magnitude.shape
@@ -150,9 +136,6 @@ class Solution():
                 T_high = i
                 break
             h_sum += histogram[i]
-
-        # print(T_high)
-        # print(T_high/2)
 
         return T_high, T_high/2
 
@@ -182,9 +165,10 @@ class Solution():
                     supressed[i,j] = magnitude[i][j]
 
         # for viewing
-        # supressed = supressed.astype(np.uint8)
-        #
-        # cv.imshow('supress', supressed)
+        supressed_img = supressed.astype(np.uint8)
+
+        # cv.imshow('Supressed Nonmaxima ' + self.title, supressed_img)
+        # cv.imwrite('Supressed Nonmaxima ' + self.title + '.jpg', supressed_img)
         # cv.waitKey(0)
 
         return supressed
@@ -206,9 +190,11 @@ class Solution():
         mh = mag_high.astype(np.uint8)
         ml = mag_low.astype(np.uint8)
 
-        cv.imshow('mhigh', mh)
+        cv.imshow('mhigh ' + self.pne + ' ' + self.title, mh)
+        cv.imwrite('mhigh ' + self.pne + ' ' + self.title + '.jpg', mh)
         cv.waitKey(0)
-        cv.imshow('mlow', ml)
+        cv.imshow('mlow ' + self.pne + ' ' + self.title, ml)
+        cv.imwrite('mlow ' + self.pne + ' ' + self.title + '.jpg', ml)
         cv.waitKey(0)
 
         # recursively generate edge_link
@@ -233,38 +219,59 @@ class Solution():
                     helper(i, j)
 
         edge_link = edge_link.astype(np.uint8)
-        cv.imshow('linked', edge_link)
-        cv.waitKey(0)
+        # cv.imshow('Linked image ' + self.title, edge_link)
+        # cv.imwrite('Linked image ' + self.title + '.jpg', edge_link)
+        # cv.waitKey(0)
 
         print('sanity check', np.array_equal(edge_link, mag_low), np.array_equal(edge_link, mag_high))
 
         return edge_link
 
 ### Experiment ###
-lena = Solution('images/lena.bmp')
-smooth_img = lena.GaussSmoothing([3,3], 1)
-magnitude, direction = lena.ImageGradient(smooth_img, mode='Sobel')
-T_high, T_low = lena.FindThreshold(magnitude)
-supressed = lena.NonmaximaSupress(magnitude, direction)
-edge_link = lena.EdgeLinking(supressed, T_high, T_low)
+# lena = Solution('images/lena.bmp', 'lena')
+# smooth_img = lena.GaussSmoothing([3,3], 1)
+# magnitude, direction = lena.ImageGradient(smooth_img, mode='Sobel')
+# T_high, T_low = lena.FindThreshold(magnitude)
+# supressed = lena.NonmaximaSupress(magnitude, direction)
+# edge_link = lena.EdgeLinking(supressed, T_high, T_low)
+#
+# test1 = Solution('images/test1.bmp', 'test1')
+# smooth_img = test1.GaussSmoothing([3,3], 1)
+# magnitude, direction = test1.ImageGradient(smooth_img, mode='Sobel')
+# T_high, T_low = test1.FindThreshold(magnitude)
+# supressed = test1.NonmaximaSupress(magnitude, direction)
+# edge_link = test1.EdgeLinking(supressed, T_high, T_low)
+#
+# joy1 = Solution('images/joy1.bmp', 'joy1')
+# smooth_img = joy1.GaussSmoothing([3,3], 1)
+# magnitude, direction = joy1.ImageGradient(smooth_img, mode='Sobel')
+# T_high, T_low = joy1.FindThreshold(magnitude)
+# supressed = joy1.NonmaximaSupress(magnitude, direction)
+# edge_link = joy1.EdgeLinking(supressed, T_high, T_low)
+#
+# pointer1 = Solution('images/pointer1.bmp', 'pointer1')
+# smooth_img = pointer1.GaussSmoothing([3,3], 1)
+# magnitude, direction = pointer1.ImageGradient(smooth_img, mode='Sobel')
+# T_high, T_low = pointer1.FindThreshold(magnitude)
+# supressed = pointer1.NonmaximaSupress(magnitude, direction)
+# edge_link = pointer1.EdgeLinking(supressed, T_high, T_low)
 
-test1 = Solution('images/test1.bmp')
-smooth_img = test1.GaussSmoothing([3,3], 1)
-magnitude, direction = test1.ImageGradient(smooth_img, mode='Sobel')
-T_high, T_low = test1.FindThreshold(magnitude)
-supressed = test1.NonmaximaSupress(magnitude, direction)
-edge_link = test1.EdgeLinking(supressed, T_high, T_low)
+# lena = Solution('images/lena.bmp', 'lena')
+# smooth_img = lena.GaussSmoothing([3,3], 1)
+# smooth_img = lena.GaussSmoothing([3,3], 3)
+# smooth_img = lena.GaussSmoothing([3,3], 10)
 
-joy1 = Solution('images/joy1.bmp')
-smooth_img = joy1.GaussSmoothing([3,3], 1)
-magnitude, direction = joy1.ImageGradient(smooth_img, mode='Sobel')
-T_high, T_low = joy1.FindThreshold(magnitude)
-supressed = joy1.NonmaximaSupress(magnitude, direction)
-edge_link = joy1.EdgeLinking(supressed, T_high, T_low)
+# smooth_img = lena.GaussSmoothing([1,1], 1)
+# smooth_img = lena.GaussSmoothing([3,3], 1)
+# smooth_img = lena.GaussSmoothing([9,9], 1)
 
-pointer1 = Solution('images/pointer1.bmp')
-smooth_img = pointer1.GaussSmoothing([3,3], 1)
-magnitude, direction = pointer1.ImageGradient(smooth_img, mode='Sobel')
-T_high, T_low = pointer1.FindThreshold(magnitude)
-supressed = pointer1.NonmaximaSupress(magnitude, direction)
-edge_link = pointer1.EdgeLinking(supressed, T_high, T_low)
+# lena = Solution('images/lena.bmp', 'lena')
+# smooth_img = lena.GaussSmoothing([3,3], 1)
+# magnitude, direction = lena.ImageGradient(smooth_img, mode='Sobel')
+# T_high, T_low = lena.FindThreshold(magnitude, percentageOfNonEdge= 0.8)
+# supressed = lena.NonmaximaSupress(magnitude, direction)
+# edge_link = lena.EdgeLinking(supressed, T_high, T_low)
+#
+# T_high, T_low = lena.FindThreshold(magnitude, percentageOfNonEdge= 0.5)
+# supressed = lena.NonmaximaSupress(magnitude, direction)
+# edge_link = lena.EdgeLinking(supressed, T_high, T_low)
